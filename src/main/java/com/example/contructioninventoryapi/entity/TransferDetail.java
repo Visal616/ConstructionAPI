@@ -1,5 +1,6 @@
 package com.example.contructioninventoryapi.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
@@ -18,6 +19,7 @@ public class TransferDetail {
     @ManyToOne
     @JoinColumn(name = "transfer_id")
     @ToString.Exclude
+    @JsonIgnore
     private Transfer transfer;
 
     private String productId;
