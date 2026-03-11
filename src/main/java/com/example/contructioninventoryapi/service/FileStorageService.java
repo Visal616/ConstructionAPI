@@ -12,8 +12,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.time.LocalDateTime;       // ✅ Added
-import java.time.format.DateTimeFormatter; // ✅ Added
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Service
 public class FileStorageService {
@@ -33,7 +33,7 @@ public class FileStorageService {
         // Normalize file name
         String originalFileName = StringUtils.cleanPath(file.getOriginalFilename());
 
-        // ✅ CHANGE: Use Date-Time format (yyyyMMdd_HHmmss) instead of UUID
+        // CHANGE: Use Date-Time format (yyyyMMdd_HHmmss) instead of UUID
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
 
         // Final Name: 20260207_153552_myImage.jpg

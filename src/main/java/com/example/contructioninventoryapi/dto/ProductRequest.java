@@ -13,5 +13,6 @@ public class ProductRequest {
     private Integer conversionRate; // e.g., 1 Box = 50 Pcs (Default: 1)
     private BigDecimal costPrice;
     private BigDecimal unitPrice;
+    private BigDecimal wholesalePrice;
     private String productImageUrl;
 }

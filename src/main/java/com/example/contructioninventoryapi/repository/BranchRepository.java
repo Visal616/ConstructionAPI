@@ -10,5 +10,5 @@ import java.util.List;
 @Repository
 public interface BranchRepository extends JpaRepository<Branch, String> {
     List<Branch> findByCompany(Company company);
-    List<Branch> findByCompany_CompanyId(String companyId);
+    List<Branch> findByCompanyCompanyId(String companyId);
 }

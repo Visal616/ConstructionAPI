@@ -5,18 +5,18 @@ import com.example.contructioninventoryapi.entity.Branch;
 import com.example.contructioninventoryapi.entity.Company;
 import com.example.contructioninventoryapi.entity.Role;
 import com.example.contructioninventoryapi.entity.User;
-import com.example.contructioninventoryapi.repository.BranchRepository; // ✅ Added
+import com.example.contructioninventoryapi.repository.BranchRepository;
 import com.example.contructioninventoryapi.repository.CompanyRepository;
 import com.example.contructioninventoryapi.repository.RoleRepository;
 import com.example.contructioninventoryapi.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -26,25 +26,31 @@ public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final CompanyRepository companyRepository;
-    private final BranchRepository branchRepository; // ✅ Added
+    private final BranchRepository branchRepository;
     private final PasswordEncoder passwordEncoder;
     private final FileStorageService fileStorageService;
 
     public UserService(UserRepository userRepository,
                        RoleRepository roleRepository,
                        CompanyRepository companyRepository,
-                       BranchRepository branchRepository, // ✅ Added
+                       BranchRepository branchRepository,
                        PasswordEncoder passwordEncoder,
                        FileStorageService fileStorageService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.companyRepository = companyRepository;
-        this.branchRepository = branchRepository; // ✅ Added
+        this.branchRepository = branchRepository;
         this.passwordEncoder = passwordEncoder;
         this.fileStorageService = fileStorageService;
     }
 
-    // --- GET PROFILE ---
+    // --- GET METHODS ---
+
+    public List<User> getUsersByCompanyId(String companyId) {
+        // NOTE: Ensure UserRepository has findByCompanyCompanyId(String companyId)
+        return userRepository.findByCompanyCompanyId(companyId);
+    }
+
     public UserResponse getUserProfile(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -92,13 +98,18 @@ public class UserService {
     }
 
     // --- CREATE USER ---
+    @Transactional
     public User createUser(User user) {
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new RuntimeException("Email already exists");
         }
 
         user.setUserId(UUID.randomUUID().toString());
-        user.setPasswordHash(passwordEncoder.encode(user.getPasswordHash()));
+
+        // SAFELY encode password
+        if (user.getPasswordHash() != null && !user.getPasswordHash().isEmpty()) {
+            user.setPasswordHash(passwordEncoder.encode(user.getPasswordHash()));
+        }
 
         // Assign Role
         if (user.getRole() != null && user.getRole().getRoleId() != null) {
@@ -112,19 +123,19 @@ public class UserService {
             user.setCompany(company);
         }
 
-        // ✅ NEW: Assign Branches
+        // Assign Branches (Optimized)
         if (user.getBranches() != null && !user.getBranches().isEmpty()) {
-            Set<Branch> managedBranches = new HashSet<>();
-            for (Branch b : user.getBranches()) {
-                branchRepository.findById(b.getBranchId()).ifPresent(managedBranches::add);
-            }
-            user.setBranches(managedBranches);
+            List<String> branchIds = user.getBranches().stream()
+                    .map(Branch::getBranchId)
+                    .collect(Collectors.toList());
+            user.setBranches(new HashSet<>(branchRepository.findAllById(branchIds)));
         }
 
         return userRepository.save(user);
     }
 
     // --- UPDATE USER ---
+    @Transactional
     public User updateUser(String id, User userDetails) {
         return userRepository.findById(id).map(existingUser -> {
 
@@ -140,6 +151,7 @@ public class UserService {
             existingUser.setPhoneNumber(userDetails.getPhoneNumber());
             existingUser.setStatus(userDetails.getStatus());
 
+            // Safely update password only if a new one is provided
             if (userDetails.getPasswordHash() != null && !userDetails.getPasswordHash().isEmpty()) {
                 existingUser.setPasswordHash(passwordEncoder.encode(userDetails.getPasswordHash()));
             }
@@ -160,19 +172,20 @@ public class UserService {
                 existingUser.setCompany(null);
             }
 
-            // ✅ NEW: Update Branches
-            if(userDetails.getBranches() != null) {
-                Set<Branch> managedBranches = new HashSet<>();
-                for (Branch b : userDetails.getBranches()) {
-                    branchRepository.findById(b.getBranchId()).ifPresent(managedBranches::add);
-                }
-                existingUser.setBranches(managedBranches);
+            // Update Branches (Optimized)
+            if (userDetails.getBranches() != null) {
+                List<String> branchIds = userDetails.getBranches().stream()
+                        .map(Branch::getBranchId)
+                        .collect(Collectors.toList());
+                existingUser.setBranches(new HashSet<>(branchRepository.findAllById(branchIds)));
             }
 
             return userRepository.save(existingUser);
         }).orElseThrow(() -> new RuntimeException("User not found"));
     }
 
+    // --- DELETE USER ---
+    @Transactional
     public void deleteUser(String id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));

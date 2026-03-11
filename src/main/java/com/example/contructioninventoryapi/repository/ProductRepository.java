@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, String> {
     // Fetch all products defined by this company (Master List)
-    List<Product> findByCompany_CompanyId(String companyId);
+    List<Product> findByCompanyId(String companyId);
 }

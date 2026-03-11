@@ -1,30 +1,30 @@
 package com.example.contructioninventoryapi.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "Customers")
-@Getter
-@Setter
+@Table(name = "customers")
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Customer {
     @Id
-    @Column(name = "customer_id")
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String customerId;
 
-    @Column(name = "customer_name", nullable = false)
+    @Column(nullable = false)
     private String customerName;
 
+    private String contactName;
     private String phone;
     private String email;
     private String address;
 
-    @OneToMany(mappedBy = "customer")
-    @JsonIgnore
-    private List<Order> orders;
+    @Column(name = "company_id", nullable = false)
+    private String companyId;
+
+    @Column(updatable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
 }

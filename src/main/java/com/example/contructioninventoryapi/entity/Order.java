@@ -1,6 +1,7 @@
 package com.example.contructioninventoryapi.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -34,7 +35,7 @@ public class Order {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "branch_id", nullable = false)
-    @JsonIgnore
+    @JsonIgnoreProperties({"orders", "users"})
     private Branch branch;
 
     @Column(name = "created_by")

@@ -13,15 +13,19 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Role {
+
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "role_id")
-    private String roleId;
+    private Integer roleId;
 
     @Column(name = "role_name", nullable = false)
     private String roleName;
 
+    @Column(name = "description")
+    private String description;
+
     @OneToMany(mappedBy = "role")
     @JsonIgnore
     private List<User> users;
-
 }

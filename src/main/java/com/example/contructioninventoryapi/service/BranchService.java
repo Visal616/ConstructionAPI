@@ -26,16 +26,15 @@ public class BranchService {
     }
 
     public List<Branch> getBranchesByCompany(String companyId) {
-        return branchRepository.findByCompany_CompanyId(companyId);
+        return branchRepository.findByCompanyCompanyId(companyId);
     }
 
     public Branch createBranch(Branch branch, String companyId) {
         Company company = companyRepository.findById(companyId)
                 .orElseThrow(() -> new RuntimeException("Company not found with ID: " + companyId));
 
-        branch.setBranchId(UUID.randomUUID().toString());
         branch.setCreatedAt(LocalDateTime.now());
-        branch.setCompany(company); // Link branch to company
+        branch.setCompany(company);
 
         return branchRepository.save(branch);
     }

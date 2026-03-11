@@ -159,13 +159,14 @@ public class SalesService {
     public List<Order> getAllSales(String branchId) {
         List<Order> sales;
 
-        if (branchId == null || branchId.isEmpty()) {
-            sales = orderRepository.findAll();
+        // THE FIX: Catch literal "null" and "undefined" strings from React's localStorage
+        if (branchId == null || branchId.trim().isEmpty() || branchId.equals("null") || branchId.equals("undefined")) {
+            sales = orderRepository.findAll(); // If no valid branch, return all sales
         } else {
             sales = orderRepository.findByBranchBranchIdOrderByOrderDateDesc(branchId);
         }
 
-        // Force Hibernate to fetch the nested lists to prevent empty arrays in JSON
+        // Force Hibernate to fetch the nested lists
         for (Order sale : sales) {
             if (sale.getOrderDetails() != null) {
                 sale.getOrderDetails().size();

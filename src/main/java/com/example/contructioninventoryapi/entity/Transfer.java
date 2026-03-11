@@ -2,6 +2,9 @@ package com.example.contructioninventoryapi.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -23,7 +26,7 @@ public class Transfer {
 
     private String createdBy;
 
-    // One transfer has many items
+
     @OneToMany(mappedBy = "transfer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TransferDetail> transferDetails;
 }

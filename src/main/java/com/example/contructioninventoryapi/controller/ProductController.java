@@ -23,18 +23,19 @@ public class ProductController {
 
     // --- CATEGORIES ---
     @GetMapping("/categories")
-    public List<Category> getCategories() {
-        return productService.getAllCategories();
+    public List<Category> getCategories(@RequestParam String companyId) {
+        return productService.getAllCategories(companyId);
     }
 
     @PostMapping("/categories")
     public Category createCategory(@RequestBody Category category) {
+
         return productService.createCategory(category);
     }
 
     // --- MASTER PRODUCTS ---
-    @GetMapping("/company/{companyId}")
-    public List<Product> getByCompany(@PathVariable String companyId) {
+    @GetMapping
+    public List<Product> getByCompany(@RequestParam String companyId) {
         return productService.getCompanyProducts(companyId);
     }
 
@@ -42,7 +43,6 @@ public class ProductController {
     public Product createProduct(@RequestBody ProductRequest request) {
         return productService.createProduct(request);
     }
-
     // --- BRANCH INVENTORY (STOCK) ---
     @GetMapping("/branch/{branchId}")
     public List<BranchProduct> getBranchStock(@PathVariable String branchId) {
@@ -77,5 +77,18 @@ public class ProductController {
             @PathVariable String inventoryId,
             @RequestParam Integer reorderLevel) {
         return ResponseEntity.ok(productService.updateReorderLevel(inventoryId, reorderLevel));
+    }
+
+    @PostMapping("/stock/deduct")
+    public ResponseEntity<?> deductStock(
+            @RequestParam String branchId,
+            @RequestParam String productId,
+            @RequestParam int quantity) {
+        try {
+            productService.deductStock(branchId, productId, quantity);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

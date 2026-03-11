@@ -32,20 +32,20 @@ public class ProductService {
         this.branchRepository = branchRepository;
     }
 
-    // --- 1. CATEGORY LOGIC ---
-    public List<Category> getAllCategories() {
-        return categoryRepository.findAll();
+    public List<Category> getAllCategories(String companyId) {
+        return categoryRepository.findByCompanyId(companyId);
     }
 
     public Category createCategory(Category category) {
-        category.setCategoryId(UUID.randomUUID().toString());
+        // FIXED: Removed manual UUID generation.
+        // We let Hibernate's @GeneratedValue handle the ID automatically!
         return categoryRepository.save(category);
     }
 
     // --- 2. MASTER PRODUCT LOGIC ---
     public Product createProduct(ProductRequest request) {
         Product product = new Product();
-        product.setProductId(UUID.randomUUID().toString());
+        product.setProductId(UUID.randomUUID().toString()); // Or let Hibernate do it!
         product.setProductName(request.getProductName());
         product.setBaseUnit(request.getBaseUnit());
         product.setPurchaseUnit(request.getPurchaseUnit());
@@ -54,22 +54,20 @@ public class ProductService {
         product.setUnitPrice(request.getUnitPrice());
         product.setProductImageUrl(request.getProductImageUrl());
 
-        // Link Category
+        // We still look up Category because you likely need to display the Category Name in the frontend
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("Category not found"));
         product.setCategory(category);
 
-        // Link Company
-        Company company = companyRepository.findById(request.getCompanyId())
-                .orElseThrow(() -> new RuntimeException("Company not found"));
-        product.setCompany(company);
+        // FIXED: No more database lookup! Just attach the string ID directly.
+        product.setCompanyId(request.getCompanyId());
 
         return productRepository.save(product);
     }
 
     // Get All Products for a Company (Master List)
     public List<Product> getCompanyProducts(String companyId) {
-        return productRepository.findByCompany_CompanyId(companyId);
+        return productRepository.findByCompanyId(companyId);
     }
 
     // --- 3. BRANCH STOCK LOGIC (The "Stock Engine") ---
@@ -119,6 +117,7 @@ public class ProductService {
             product.setBaseUnit(request.getBaseUnit());
             product.setPurchaseUnit(request.getPurchaseUnit());
             product.setConversionRate(request.getConversionRate());
+            product.setWholesalePrice(request.getWholesalePrice());
 
             // FIX: Update the image URL if it's sent from the frontend
             if (request.getProductImageUrl() != null && !request.getProductImageUrl().isEmpty()) {

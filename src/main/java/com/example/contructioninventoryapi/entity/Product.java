@@ -23,11 +23,14 @@ public class Product {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    // Link product to the Company (Global Definition)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "company_id")
-    @JsonIgnore
-    private Company company;
+//    Link product to the Company (Global Definition)
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "company_id")
+//    @JsonIgnore
+//    private Company company;
+
+    @Column(name = "company_id", nullable = false)
+    private String companyId;
 
     @Column(name = "unit_price", nullable = false)
     private BigDecimal unitPrice;

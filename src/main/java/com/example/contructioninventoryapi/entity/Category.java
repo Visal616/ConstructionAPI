@@ -24,7 +24,10 @@ public class Category {
     @Column(name = "description", nullable = false)
     private String description;
 
+    @Column(name = "company_id", nullable = false)
+    private String companyId;
+
     @OneToMany(mappedBy = "category")
-    @JsonIgnore // <--- ADD THIS
+    @JsonIgnore
     private List<Product> products;
 }
